@@ -1,16 +1,12 @@
 services:
-
   postgres:
     image: postgres:16
     container_name: freelance-hub-postgres
-    restart: unless-stopped
 
     environment:
-      POSTGRES_DB: freelance_hub
-      POSTGRES_USER: Sparsh78.in
-      POSTGRES_PASSWORD: Sp#2547Ugko*75
-      TZ: Asia/Kolkata,
-      PGTZ: Asia/Kolkata
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
     ports:
       - "5432:5432"
