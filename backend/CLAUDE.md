@@ -1,0 +1,1 @@
+See @docs/PROJECT_OVERVIEW.md for business context and @docs/BACKEND_BRIEF.md for backend scope and conventions.
