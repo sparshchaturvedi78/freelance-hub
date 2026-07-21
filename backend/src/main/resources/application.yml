@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/freelance_hub?options=-c%20TimeZone=Asia%2FKolkata
-    username: Sparsh78.in
-    password: Sp#2547Ugko*75
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
 
   jpa:
     hibernate:
