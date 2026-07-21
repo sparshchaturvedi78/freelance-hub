@@ -1,12 +1,13 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/freelance_hub?options=-c%20TimeZone=Asia%2FKolkata
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+    username: ${POSTGRES_USER:freelance_hub}
+    password: ${POSTGRES_PASSWORD:password}
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
+      dialect: org.hibernate.dialect.PostgreSQLDialect
 
     properties:
       hibernate:
