@@ -3,12 +3,15 @@ package com.sparsh.freelancehub.auth.service;
 import com.sparsh.freelancehub.auth.dto.*;
 import com.sparsh.freelancehub.auth.entity.RefreshToken;
 import com.sparsh.freelancehub.auth.entity.User;
+import com.sparsh.freelancehub.auth.repository.OtpRequestRepository;
 import com.sparsh.freelancehub.auth.repository.RefreshTokenRepository;
+import com.sparsh.freelancehub.auth.repository.TempSignupRepository;
 import com.sparsh.freelancehub.auth.repository.UserRepository;
 import com.sparsh.freelancehub.common.enums.Role;
 import com.sparsh.freelancehub.common.exception.EmailAlreadyExistsException;
 import com.sparsh.freelancehub.common.exception.InvalidCredentialsException;
 import com.sparsh.freelancehub.common.exception.InvalidRefreshTokenException;
+import com.sparsh.freelancehub.email.service.EmailService;
 import com.sparsh.freelancehub.security.JwtProperties;
 import com.sparsh.freelancehub.security.JwtService;
 import com.sparsh.freelancehub.tenant.entity.Organization;
@@ -49,10 +52,23 @@ public class AuthServiceTest {
 
     private AuthService authService;
 
+    @Mock
+    private  OtpRequestRepository otpRequestRepository;
+
+    @Mock
+    private  TempSignupRepository tempSignupRepository;
+
+    @Mock
+    private  OtpService otpService;
+
+    @Mock
+    private  EmailService emailService;
+
+
+
     @BeforeEach
     public void setup() {
-        authService = new AuthService(userRepository, refreshTokenRepository, organizationRepository,
-                jwtService, jwtProperties, passwordEncoder);
+        authService = new AuthService(userRepository, refreshTokenRepository, otpRequestRepository, tempSignupRepository, organizationRepository,jwtService, jwtProperties, passwordEncoder, otpService, emailService);
     }
 
     @Test

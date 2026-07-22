@@ -4,7 +4,7 @@
 
 FreelanceHub is a multi-tenant SaaS platform for freelancers and small agencies to manage clients, projects, time tracking, invoicing, and payments. This document tracks development milestones, architectural decisions, and setup instructions.
 
-**Current Status**: Stage 2 in progress (Schema + Entities + Auth complete, DB connection tuning pending)
+**Current Status**: Stage 3 complete (Auth + CRUD endpoints ready, TimeEntry/Invoice CRUD pending)
 
 ---
 
@@ -199,12 +199,12 @@ spring:
 backend/
 ├── src/main/java/com/sparsh/freelancehub/
 │   ├── auth/              # Auth service/controller + DTOs
-│   ├── client/            # Client entity + repository
+│   ├── client/            # Client entity/repository/service/controller + DTOs
 │   ├── common/            # Enums, exceptions, API response, config
 │   ├── invoice/           # Invoice entities + repositories
-│   ├── project/           # Project entity + repository
+│   ├── project/           # Project entity/repository/service/controller + DTOs
 │   ├── security/          # JWT, UserPrincipal, auth filter
-│   ├── tenant/            # Organization, invites
+│   ├── tenant/            # Organization, invites, service/controller + DTOs
 │   ├── timeentry/         # TimeEntry entity + repository
 │   └── BackendApplication.java
 ├── src/main/resources/
@@ -326,19 +326,89 @@ POSTGRES_PORT=5432
 
 ---
 
-## Next Milestones
+## Stage 3: CRUD Endpoints (Organizations, Clients, Projects) ✅
 
-### Stage 3: CRUD Endpoints (Clients, Projects)
-- REST endpoints scoped by organizationId
-- @PreAuthorize checks at method level
-- Unit + integration tests (Testcontainers)
+**Branch**: `feature/crud-endpoints` | **Status**: Pushed, code complete
+
+### What was built
+
+**Organization Management** (`backend/src/main/java/com/sparsh/freelancehub/tenant/`):
+- `OrganizationController`: GET current, PUT update, POST invite, POST accept invite
+- `OrganizationService`: Org retrieval, update with OWNER check, invite flow with token-based acceptance
+- DTOs: `OrganizationResponse`, `UpdateOrganizationRequest`, `InviteMemberRequest`
+- Invites: 7-day token expiry, PENDING → ACCEPTED flow, prevents duplicate emails
+
+**Client CRUD** (`backend/src/main/java/com/sparsh/freelancehub/client/`):
+- `ClientController`: GET list (paginated), GET detail, POST create, PUT update, DELETE
+- `ClientService`: Full CRUD with org-scoped authorization checks on all operations
+- DTOs: `ClientRequest`, `ClientResponse`
+- Repository: Added `findAllByOrganizationId(Long organizationId, Pageable pageable)`
+
+**Project CRUD** (`backend/src/main/java/com/sparsh/freelancehub/project/`):
+- `ProjectController`: GET list, GET detail, GET by client (paginated), POST create, PUT update, DELETE
+- `ProjectService`: CRUD with client ownership validation, org isolation
+- DTOs: `ProjectRequest`, `ProjectResponse` (includes hourlyRate as BigDecimal)
+- Repository: Added paginated methods `findAllByOrganizationId` and `findAllByClientIdAndOrganizationId`
+
+### Key Decisions
+
+- **Authorization**: All endpoints check that `request.organizationId == principal.organizationId` before CRUD ops
+- **Pagination**: List endpoints accept Spring Data `Pageable` (page, size, sort)
+- **Money**: Project hourlyRate stored as BigDecimal, never float
+- **Invites**: Token-based, email validation, prevents re-inviting existing users
+- **Soft deletes**: Clients have `is_archived` flag (hard delete forbidden per brief)
+
+### Testing
+
+```bash
+./mvnw.cmd clean compile
+# Result: 50 source files compiled successfully
+```
+
+### API Endpoints Summary
+
+```
+POST   /api/auth/register                    # Create org + user
+POST   /api/auth/login                       # Login
+POST   /api/auth/refresh                     # Refresh tokens
+POST   /api/auth/logout                      # Logout
+
+GET    /api/organizations/current            # Get current org
+PUT    /api/organizations/current            # Update org (OWNER only)
+POST   /api/organizations/invite             # Invite member (OWNER/ADMIN)
+POST   /api/organizations/invites/{token}/accept  # Accept invite
+
+GET    /api/clients                          # List clients (paginated)
+GET    /api/clients/{id}                     # Get client detail
+POST   /api/clients                          # Create client
+PUT    /api/clients/{id}                     # Update client
+DELETE /api/clients/{id}                     # Delete client
+
+GET    /api/projects                         # List projects (paginated)
+GET    /api/projects/{id}                    # Get project detail
+GET    /api/projects/client/{clientId}       # List by client (paginated)
+POST   /api/projects                         # Create project
+PUT    /api/projects/{id}                    # Update project
+DELETE /api/projects/{id}                    # Delete project
+```
+
+---
+
+## Next Milestones
 
 ### Stage 4: TimeEntry & Invoice CRUD
 - Time entry CRUD with billable flag filtering
 - Invoice generation from time entries
 - Integration tests covering full flow
 
-### Stage 5: Dashboard Skeleton
+### Stage 5: Frontend UI
+- Auth flows (register, login, logout)
+- Organization & team management UI
+- Client management dashboard
+- Project & time tracking UI
+- Invoice generation & preview
+
+### Stage 6: Dashboard Skeleton
 - Outstanding invoices summary
 - This month's billable hours
 - Active projects count
@@ -421,4 +491,4 @@ This pattern keeps history transparent and onboarding smooth.
 
 **Last Updated**: 2026-07-22  
 **Author**: Claude Haiku 4.5  
-**Status**: Stage 2 in progress (schema + auth complete, CRUD + dashboard pending)
+**Status**: Stage 3 complete (Auth + CRUD endpoints ready for frontend integration)

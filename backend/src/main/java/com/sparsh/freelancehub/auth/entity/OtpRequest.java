@@ -1,6 +1,5 @@
 package com.sparsh.freelancehub.auth.entity;
 
-import com.sparsh.freelancehub.common.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -10,8 +9,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.Instant;
 
 @Entity
-@Table(name = "users", indexes = {
-    @Index(name = "idx_users_organization_id", columnList = "organization_id")
+@Table(name = "otp_requests", indexes = {
+    @Index(name = "idx_otp_requests_email", columnList = "email"),
+    @Index(name = "idx_otp_requests_expires_at", columnList = "expires_at"),
+    @Index(name = "idx_otp_requests_is_active", columnList = "is_active")
 })
 @EntityListeners(AuditingEntityListener.class)
 @Getter
@@ -19,34 +20,35 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class OtpRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "organization_id")
-    private Long organizationId;
-
-    @Column(name = "client_id")
-    private Long clientId;
-
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
-
-    @Column(name = "full_name")
-    private String fullName;
+    @Column(name = "otp_hash", nullable = false)
+    private String otpHash;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role;
+    private OtpPurpose purpose;
 
-    @Column(name = "email_verified", nullable = false)
+    @Column(name = "expires_at", nullable = false)
+    private Instant expiresAt;
+
+    @Column(name = "used_at")
+    private Instant usedAt;
+
+    @Column(nullable = false)
     @Builder.Default
-    private Boolean emailVerified = false;
+    private Integer attempts = 0;
+
+    @Column(name = "max_attempts", nullable = false)
+    @Builder.Default
+    private Integer maxAttempts = 5;
 
     @Column(name = "is_active", nullable = false)
     @Builder.Default
@@ -59,4 +61,9 @@ public class User {
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+
+    public enum OtpPurpose {
+        EMAIL_VERIFICATION,
+        PASSWORD_RESET
+    }
 }
