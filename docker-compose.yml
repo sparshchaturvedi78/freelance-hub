@@ -4,9 +4,9 @@ services:
     container_name: freelance-hub-postgres
 
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-freelance_hub}
+      POSTGRES_USER: ${POSTGRES_USER:-freelance_hub}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
 
     ports:
       - "5432:5432"
