@@ -12,10 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RegisterRequest {
-    @Size(min = 2, max = 255, message = "Organization name must be between 2 and 255 characters")
-    private String organizationName;
-
+public class ResetPasswordRequest {
     @NotBlank(message = "Email is required")
     @Email(message = "Email should be valid")
     private String email;
@@ -26,7 +23,4 @@ public class RegisterRequest {
 
     @NotBlank(message = "Confirm password is required")
     private String confirmPassword;
-
-    @Size(max = 255, message = "Full name must not exceed 255 characters")
-    private String fullName;
 }
